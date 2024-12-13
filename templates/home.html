@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="row">
+
+    <aside class="col-md-4 col-lg-3 col-sm-12" id="home-aside">
+      <div class="card user-card">
+        <div>
+          <div class="image-wrapper">
+            <img src="{{ g.user.header_image_url }}" alt="" class="card-hero">
+          </div>
+          <a href="/users/{{ g.user.id }}" class="card-link">
+            <img src="{{ g.user.image_url }}"
+                 alt="Image for {{ g.user.username }}"
+                 class="card-image">
+            <p>@{{ g.user.username }}</p>
+          </a>
+          <ul class="user-stats nav nav-pills">
+            <li class="stat">
+              <p class="small">Messages</p>
+              <h4>
+                <a href="/users/{{ g.user.id }}">
+                  {{ g.user.messages | length }}
+                </a>
+              </h4>
+            </li>
+            <li class="stat">
+              <p class="small">Following</p>
+              <h4>
+                <a href="/users/{{ g.user.id }}/following">
+                  {{ g.user.following | length }}
+                </a>
+              </h4>
+            </li>
+            <li class="stat">
+              <p class="small">Followers</p>
+              <h4>
+                <a href="/users/{{ g.user.id }}/followers">
+                  {{ g.user.followers | length }}
+                </a>
+              </h4>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </aside>
+
+    <div class="col-lg-6 col-md-8 col-sm-12">
+      <ul class="list-group" id="messages">
+        {% if not messages[0] %}
+          <div class="p-3 mb-2 bg-secondary text-white">
+            <p>follow someone to see their messages on timeline</p>
+          </div>
+        {% endif %}
+        {% for msg in messages %}
+        <li class="list-group-item">
+              <a href="/messages/{{ msg.id }}" class="message-link"></a>
+              <a href="/users/{{ msg.user.id }}">
+                <img src="{{ msg.user.image_url }}" alt="" class="timeline-image">
+              </a>
+              <div class="message-area">
+                <a href="/users/{{ msg.user.id }}">@{{ msg.user.username }}</a>
+                <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
+                <p>{{ msg.text }}</p>
+                {% if msg.user_id != g.user.id %}
+                  {% if msg in g.user.likes %}
+                  <form action="/messages/unlike/{{ msg.id }}" method="POST" class="d-inline">
+                    {{ g.csrf_form.hidden_tag() }}
+                    <button class="like-button btn btn-link bg-transparent border-0 p-0">
+                      <i class="bi bi-hand-thumbs-up-fill"></i>
+                    </button>
+                  </form>
+                  {% else %}
+                  <form action="/messages/like/{{ msg.id }}" method="POST" class="d-inline">
+                    {{ g.csrf_form.hidden_tag() }}
+                    <button class="like-button btn btn-link bg-transparent border-0 p-0">
+                      <i class="bi bi-hand-thumbs-up"></i>
+                    </button>
+                  </form>
+                  {% endif %}
+                {% else %}
+                  <i class="bi bi-hand-thumbs-up"></i>
+                {% endif %}
+                <span>{{ msg.likers|length if msg.likers else 0 }}</span>
+              </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+  </div>
+{% endblock %}
